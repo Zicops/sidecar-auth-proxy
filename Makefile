@@ -12,15 +12,15 @@ clean:
 	-rm $(BINARY_NAME)
 mac:
 	@echo "building $(BINARY_NAME) (mac)" ;\
-        go build -o $(BINARY_NAME) ./cmd/sidecar-auth-proxy
+        go build -o $(BINARY_NAME) .
 linux:
 	## CGO_ENABLED=0 go build -a -installsuffix cgo is not needed for Go 1.10 or later
 	## https://github.com/golang/go/issues/9344#issuecomment-69944514
 	@echo "building $(BINARY_NAME) (linux)" ;\
-        GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME) ./cmd/sidecar-auth-proxy
+        GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME) .
 windows:
 	@echo "building $(BINARY_NAME) (windows)" ;\
-      		env GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME) ./cmd/sidecar-auth-proxy
+      		env GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME) .
 test:
 	@CC=gcc go test ./...
 
