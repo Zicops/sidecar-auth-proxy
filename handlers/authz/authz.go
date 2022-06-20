@@ -35,6 +35,7 @@ func Check(h http.Handler) http.Handler {
 		}
 		if Auth == nil {
 			http.Error(w, "Fatal: Failed to initialize auth.", http.StatusInternalServerError)
+			return
 		}
 		incomingToken := jwt.GetToken(r)
 		if incomingToken == "" {
