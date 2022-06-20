@@ -3,6 +3,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,19 +18,19 @@ func main() {
 	//os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../../zicops-cc.json")
 
 	log.Infof("Starting sidecar-auth-proxy as sidecar container.")
-	// flag.StringVar(&proxy.Port, "port", "", "Expose a port to accept HTTP/1.x connections")
-	// flag.StringVar(&proxy.Backend, "backend", "", "Change the application server address to which to proxies the requests")
-	// mode := flag.String("mode", "", "What to proxy authn, authz etc. They may be piped together e.g authn|authz")
+	flag.StringVar(&proxy.Port, "port", "", "Expose a port to accept HTTP/1.x connections")
+	flag.StringVar(&proxy.Backend, "backend", "", "Change the application server address to which to proxies the requests")
+	mode := flag.String("mode", "", "What to proxy authn, authz etc. They may be piped together e.g authn|authz")
 
-	// // parse flags to get port, backend and mode
-	// flag.Parse()
-	// if flag.NFlag() < 3 {
-	// 	flag.PrintDefaults()
-	// 	log.Panicf("Expected 3 arguments, got %v", os.Args[1:])
-	// }
-	proxy.Port = "8094"
-	proxy.Backend = "http://localhost:8080"
-	mode := "authz"
+	// parse flags to get port, backend and mode
+	flag.Parse()
+	if flag.NFlag() < 3 {
+		flag.PrintDefaults()
+		log.Panicf("Expected 3 arguments, got %v", os.Args[1:])
+	}
+	// proxy.Port = "8094"
+	// proxy.Backend = "http://localhost:8080"
+	// mode := "authz"
 	// Channels for os signals
 	sigC := make(chan os.Signal, 1)
 	signal.Notify(sigC, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
@@ -45,7 +46,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	//Start the server and establish communication with backend
-	go server.ProxyServerStart(ctx, proxy.Port, &mode, proxyProtocol)
+	go server.ProxyServerStart(ctx, proxy.Port, mode, proxyProtocol)
 	log.Infof("Proxy Server Started.")
 	sig := <-sigC
 	log.Infof("Received %d, shutting down", sig)
