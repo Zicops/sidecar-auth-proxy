@@ -37,9 +37,9 @@ func Check(h http.Handler) http.Handler {
 			incomingToken = jwt.GetTokenWebsocket(r)
 		}
 		claimsFromToken, err := jwt.GetClaims(incomingToken)
-		if err != nil && !strings.Contains(r.URL.Path, "login") {
-			log.Errorf("Bad token provided. Error: %v", err)
-			return
+		if claimsFromToken == nil {
+			log.Errorf("Failed to get claims from token", err)
+			claimsFromToken = make(map[string]interface{})
 		}
 		ctx := context.WithValue(r.Context(), "zclaims", claimsFromToken)
 		returnedToken, err := Auth.VerifyUserToken(ctx, incomingToken)
