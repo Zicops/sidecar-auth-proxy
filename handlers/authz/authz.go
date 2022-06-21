@@ -38,7 +38,7 @@ func Check(h http.Handler) http.Handler {
 		}
 		claimsFromToken, err := jwt.GetClaims(incomingToken)
 		if claimsFromToken == nil {
-			log.Errorf("Failed to get claims from token", err)
+			log.Errorf("Failed to get claims from token", err.Error())
 			claimsFromToken = make(map[string]interface{})
 		}
 		ctx := context.WithValue(r.Context(), "zclaims", claimsFromToken)
