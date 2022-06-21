@@ -28,7 +28,7 @@ func Claims(r *http.Request) (*claims, error) {
 
 // ClaimsFromToken creates claims from given token
 func ClaimsFromToken(token string) (*claims, error) {
-	allclaims, e := getClaims(token)
+	allclaims, e := GetClaims(token)
 	if e != nil {
 		return nil, e
 	}
@@ -73,7 +73,7 @@ func GetTokenWebsocket(r *http.Request) string {
 	return ""
 }
 
-func getClaims(stoken string) (map[string]interface{}, error) {
+func GetClaims(stoken string) (map[string]interface{}, error) {
 	token, _ := jwt.Parse(stoken, func(t *jwt.Token) (interface{}, error) {
 		return t, nil
 	})

@@ -11,8 +11,6 @@ import (
 	"github.com/zicops/sidecar-auth-proxy/lib/googleprojectlib"
 	"github.com/zicops/sidecar-auth-proxy/lib/identity"
 	"github.com/zicops/sidecar-auth-proxy/lib/jwt"
-
-	"go.opencensus.io/trace"
 )
 
 // Auth ...
@@ -24,9 +22,6 @@ func Check(h http.Handler) http.Handler {
 	currentProject := googleprojectlib.GetGoogleProjectDefaultID()
 	Auth, _ = identity.NewIDPEP(ctxAuth, currentProject)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx, spanAuthn := trace.StartSpan(ctx, "sidecar-asp-authz")
-		defer spanAuthn.End()
 		log.Println("Authz in process")
 		if strings.Contains(r.URL.Path, "healthz") {
 			log.Errorf("Method does not exist. /healthz should not be visible from outside cluster")
@@ -41,14 +36,18 @@ func Check(h http.Handler) http.Handler {
 		if incomingToken == "" {
 			incomingToken = jwt.GetTokenWebsocket(r)
 		}
+		claimsFromToken, err := jwt.GetClaims(incomingToken)
+		if err != nil && !strings.Contains(r.URL.Path, "login") {
+			log.Errorf("Bad token provided. Error: %v", err)
+			return
+		}
+		ctx := context.WithValue(r.Context(), "zclaims", claimsFromToken)
 		returnedToken, err := Auth.VerifyUserToken(ctx, incomingToken)
 		if err != nil && returnedToken == nil {
 			log.Errorf("Token signature verification failed. Error: %v", err)
 			http.Error(w, "Unauthorized: Bad request or authorization details, invalid token", http.StatusUnauthorized)
 			return
 		}
-
-		spanAuthn.End()
-		h.ServeHTTP(w, r)
+		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
