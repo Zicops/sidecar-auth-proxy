@@ -20,7 +20,10 @@ var Auth *identity.IDP
 func Check(h http.Handler) http.Handler {
 	ctxAuth := context.Background()
 	currentProject := googleprojectlib.GetGoogleProjectDefaultID()
-	Auth, _ = identity.NewIDPEP(ctxAuth, currentProject)
+	Auth, err := identity.NewIDPEP(ctxAuth, currentProject)
+	if err != nil {
+		log.Panicf("Auth: %s", err.Error())
+	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Authz in process")
 		if strings.Contains(r.URL.Path, "healthz") {
