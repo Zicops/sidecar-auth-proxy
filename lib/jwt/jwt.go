@@ -176,3 +176,10 @@ func GetAudience(r *http.Request) (string, error) {
 	}
 	return "everyone", nil
 }
+
+func VerifyToken(token string) error {
+	_, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return t, nil
+	})
+	return err
+}
