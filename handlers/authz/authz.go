@@ -31,6 +31,10 @@ func Check(h http.Handler) http.Handler {
 			http.Error(w, "Method does not exist.", http.StatusUnauthorized)
 			return
 		}
+		if strings.Contains(r.URL.Path, "reset-password") {
+			h.ServeHTTP(w, r)
+			return
+		}
 		if Auth == nil {
 			http.Error(w, "Fatal: Failed to initialize auth.", http.StatusInternalServerError)
 			return
