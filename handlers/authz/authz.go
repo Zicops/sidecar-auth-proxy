@@ -49,6 +49,7 @@ func Check(h http.Handler) http.Handler {
 			claimsFromToken = make(map[string]interface{})
 		}
 		ctx := context.WithValue(r.Context(), "zclaims", claimsFromToken)
+		
 		returnedToken, err := Auth.VerifyUserToken(ctx, incomingToken)
 		if err != nil && returnedToken == nil {
 			log.Errorf("Token signature verification failed. Error: %v", err)
