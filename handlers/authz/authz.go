@@ -31,7 +31,7 @@ func Check(h http.Handler) http.Handler {
 			http.Error(w, "Method does not exist.", http.StatusUnauthorized)
 			return
 		}
-		if strings.Contains(r.URL.Path, "reset-password") {
+		if strings.Contains(r.URL.Path, "reset-password") || strings.Contains(r.URL.Path, "org") {
 			h.ServeHTTP(w, r)
 			return
 		}
@@ -49,7 +49,7 @@ func Check(h http.Handler) http.Handler {
 			claimsFromToken = make(map[string]interface{})
 		}
 		ctx := context.WithValue(r.Context(), "zclaims", claimsFromToken)
-		
+
 		returnedToken, err := Auth.VerifyUserToken(ctx, incomingToken)
 		if err != nil && returnedToken == nil {
 			log.Errorf("Token signature verification failed. Error: %v", err)
