@@ -31,7 +31,7 @@ func Check(h http.Handler) http.Handler {
 			http.Error(w, "Method does not exist.", http.StatusUnauthorized)
 			return
 		}
-		if strings.Contains(r.URL.Path, "reset-password") || strings.Contains(r.URL.Path, "org") {
+		if strings.Contains(r.URL.Path, "reset-password") || strings.Contains(r.URL.Path, "org") || strings.Contains(r.URL.Path, "metrics") {
 			h.ServeHTTP(w, r)
 			return
 		}
