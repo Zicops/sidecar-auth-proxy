@@ -52,7 +52,7 @@ func ProxyServerStart(ctx context.Context, port string, modes *string, proxyProt
 
 	// init server
 	srv := &graceful.Server{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 		//BeforeShutdown:    beforeShutDown,
 		ShutdownInitiated: shutdownInitiated,
 		Server: &http.Server{
@@ -62,29 +62,19 @@ func ProxyServerStart(ctx context.Context, port string, modes *string, proxyProt
 			WriteTimeout: time.Duration(30) * time.Second,
 		},
 	}
-	runningServer = &ProxyServer{
-		httpServer: srv,
-	}
-	// init stop channel
-	stop := srv.StopChan()
 
 	// start the server
-	err := runningServer.httpServer.ListenAndServe()
-	if err != nil {
-		log.Fatalf("ProxyServer: Failed to start server : %s", err.Error())
-	}
-	log.Infof("Proxy Server Started: Successfully")
-	for {
-		// wait for the server to stop or be canceled
-		select {
-		case <-stop:
-			log.Infof("Sidecar Auth Proxy: Server shutdown at %v", time.Now())
-			return
-		case <-ctx.Done():
-			log.Infof("Sidecar Auth Proxy: context done is called %v", time.Now())
-			srv.Stop(time.Second * 2)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatalf("ProxyServer: Failed to start server : %s", err.Error())
 		}
-	}
+	}()
+	// wait for the context to be canceled
+	<-ctx.Done()
+
+	log.Infof("Sidecar Auth Proxy: context done is called %v", time.Now())
+	srv.Shutdown(ctx)
+	log.Infof("Sidecar Auth Proxy: Server shutdown at %v", time.Now())
 }
 
 // ProxyServerShutDown shutdown on command
